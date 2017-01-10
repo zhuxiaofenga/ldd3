@@ -9,6 +9,14 @@
 MODULE_AUTHOR("Jonathan Corbet");
 MODULE_LICENSE("Dual BSD/GPL");
 
+/* for me to see*/
+static struct ldd_driver sculld_driver = {
+	.version = "$Revision: 1.21 $",
+	.module = THIS_MODULE,
+	.driver = {
+		.name = "sculld",
+	},
+};
 
 static struct ldd_driver *p = NULL;
 
@@ -23,6 +31,10 @@ static int __init ldd_drv_init(void)
         printk("kzalloc fail \n");
         return -1;
     }
+    p->version = "aaaa";
+    p->module = THIS_MODULE;
+    p->driver.name = "scullmmm";
+
     ret = register_ldd_driver(p);
     if (ret)
         return -1;
