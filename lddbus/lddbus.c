@@ -32,6 +32,7 @@ static char *Version = "$Revision: 1.9 $";
  */
 static int ldd_uevent(struct device *dev, struct kobj_uevent_env *env)
 {
+        printk("in function %s line %d\n", __FUNCTION__,__LINE__);
 	if (add_uevent_var(env, "LDDBUS_VERSION=%s", Version))
 		return -ENOMEM;
 
@@ -43,6 +44,8 @@ static int ldd_uevent(struct device *dev, struct kobj_uevent_env *env)
  */
 static int ldd_match(struct device *dev, struct device_driver *driver)
 {
+        printk("in function %s line %d\n", __FUNCTION__,__LINE__);
+        printk("dev->name = %s driver->name = %s\n", dev_name(dev),driver->name);
 	return !strncmp(dev_name(dev), driver->name, strlen(driver->name));
 }
 
@@ -52,6 +55,7 @@ static int ldd_match(struct device *dev, struct device_driver *driver)
  */
 static void ldd_bus_release(struct device *dev)
 {
+        printk("in function %s line %d\n", __FUNCTION__,__LINE__);
 	printk(KERN_DEBUG "lddbus release\n");
 }
 	
@@ -75,6 +79,7 @@ struct bus_type ldd_bus_type = {
  */
 static ssize_t show_bus_version(struct bus_type *bus, char *buf)
 {
+        printk("in function %s line %d\n", __FUNCTION__,__LINE__);
 	return snprintf(buf, PAGE_SIZE, "%s\n", Version);
 }
 
@@ -96,16 +101,23 @@ static void ldd_dev_release(struct device *dev)
 
 int register_ldd_device(struct ldd_device *ldddev)
 {
+        printk("register_ldd_device###\n");
+
+        printk("in function %s line %d\n", __FUNCTION__,__LINE__);
 	ldddev->dev.bus = &ldd_bus_type;
 	ldddev->dev.parent = &ldd_bus;
 	ldddev->dev.release = ldd_dev_release;
-	dev_set_name(&ldddev->dev, "ldd0");
+	dev_set_name(&ldddev->dev, "ldd1");
 	return device_register(&ldddev->dev);
 }
 EXPORT_SYMBOL(register_ldd_device);
 
 void unregister_ldd_device(struct ldd_device *ldddev)
 {
+        
+        printk("in function %s line %d\n", __FUNCTION__,__LINE__);
+        printk("unregister_ldd_device###\n");
+
 	device_unregister(&ldddev->dev);
 }
 EXPORT_SYMBOL(unregister_ldd_device);
@@ -119,6 +131,7 @@ static ssize_t show_version(struct device_driver *driver, char *buf)
 {
 	struct ldd_driver *ldriver = to_ldd_driver(driver);
 
+        printk("in function %s line %d\n", __FUNCTION__,__LINE__);
 	sprintf(buf, "%s\n", ldriver->version);
 	return strlen(buf);
 }
@@ -128,10 +141,12 @@ int register_ldd_driver(struct ldd_driver *driver)
 {
 	int ret;
 	
+        printk("in function %s line %d\n", __FUNCTION__,__LINE__);
 	driver->driver.bus = &ldd_bus_type;
 	ret = driver_register(&driver->driver);
 	if (ret)
 		return ret;
+	printk("!!!!\n");
 	driver->version_attr.attr.name = "version";
 	driver->version_attr.attr.mode = S_IRUGO;
 	driver->version_attr.show = show_version;
@@ -141,6 +156,7 @@ int register_ldd_driver(struct ldd_driver *driver)
 
 void unregister_ldd_driver(struct ldd_driver *driver)
 {
+        printk("in function %s line %d\n", __FUNCTION__,__LINE__);
 	driver_unregister(&driver->driver);
 }
 EXPORT_SYMBOL(register_ldd_driver);
@@ -151,6 +167,8 @@ EXPORT_SYMBOL(unregister_ldd_driver);
 static int __init ldd_bus_init(void)
 {
 	int ret;
+
+        printk("in function %s line %d\n", __FUNCTION__,__LINE__);
 
 	ret = bus_register(&ldd_bus_type);
 	if (ret)
@@ -165,6 +183,7 @@ static int __init ldd_bus_init(void)
 
 static void ldd_bus_exit(void)
 {
+        printk("in function %s line %d\n", __FUNCTION__,__LINE__);
 	device_unregister(&ldd_bus);
 	bus_unregister(&ldd_bus_type);
 }

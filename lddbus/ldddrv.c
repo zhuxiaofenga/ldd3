@@ -20,10 +20,15 @@ static struct ldd_driver sculld_driver = {
 
 static struct ldd_driver *p = NULL;
 
+static int ldd_probe()
+{
+   return 0; 
+}
+
 static int __init ldd_drv_init(void)
 {
-        printk("in function %s line %d\n", __FUNCTION__,__LINE__);
     int ret;
+        printk("in function %s line %d\n", __FUNCTION__,__LINE__);
     if (!p);
         p = kzalloc(sizeof(struct ldd_driver), GFP_KERNEL);
     if (!p)
@@ -33,7 +38,8 @@ static int __init ldd_drv_init(void)
     }
     p->version = "aaaa";
     p->module = THIS_MODULE;
-    p->driver.name = "scullmmm";
+    p->driver.name = "ldd1";
+    p->driver.probe = ldd_probe;
 
     ret = register_ldd_driver(p);
     if (ret)

@@ -23,6 +23,8 @@ static int __init ldd_dev_init(void)
         return -1;
     }
 
+    p->name = "myldddev";
+
     ret = register_ldd_device(p);
     if (ret)
         return -1;

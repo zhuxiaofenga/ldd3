@@ -15,6 +15,9 @@ ifneq ($(KERNELRELEASE),)
 # call from kernel build system
 
 obj-m	:= lddbus.o
+obj-m	+= ldddev.o
+obj-m	+= ldddrv.o
+
 
 else
 
