@@ -90,6 +90,7 @@ int scull_read_procmem(struct seq_file *s, void *v)
         int i, j;
         int limit = s->size - 80; /* Don't print more than this */
 
+        printk("in __FUNCTION__ = %s __LINE__ = %d\n", __FUNCTION__, __LINE__);
         for (i = 0; i < scull_nr_devs && s->count <= limit; i++) {
                 struct scull_dev *d = &scull_devices[i];
                 struct scull_qset *qs = d->data;
@@ -120,6 +121,7 @@ int scull_read_procmem(struct seq_file *s, void *v)
  */
 static void *scull_seq_start(struct seq_file *s, loff_t *pos)
 {
+        printk("in __FUNCTION__ = %s __LINE__ = %d\n", __FUNCTION__, __LINE__);
 	if (*pos >= scull_nr_devs)
 		return NULL;   /* No more to read */
 	return scull_devices + *pos;
@@ -127,6 +129,7 @@ static void *scull_seq_start(struct seq_file *s, loff_t *pos)
 
 static void *scull_seq_next(struct seq_file *s, void *v, loff_t *pos)
 {
+        printk("in __FUNCTION__ = %s __LINE__ = %d\n", __FUNCTION__, __LINE__);
 	(*pos)++;
 	if (*pos >= scull_nr_devs)
 		return NULL;
@@ -136,6 +139,8 @@ static void *scull_seq_next(struct seq_file *s, void *v, loff_t *pos)
 static void scull_seq_stop(struct seq_file *s, void *v)
 {
 	/* Actually, there's nothing to do here */
+
+        printk("in __FUNCTION__ = %s __LINE__ = %d\n", __FUNCTION__, __LINE__);
 }
 
 static int scull_seq_show(struct seq_file *s, void *v)
@@ -144,6 +149,7 @@ static int scull_seq_show(struct seq_file *s, void *v)
 	struct scull_qset *d;
 	int i;
 
+        printk("in __FUNCTION__ = %s __LINE__ = %d\n", __FUNCTION__, __LINE__);
 	if (down_interruptible(&dev->sem))
 		return -ERESTARTSYS;
 	seq_printf(s, "\nDevice %i: qset %i, q %i, sz %li\n",
@@ -178,11 +184,13 @@ static struct seq_operations scull_seq_ops = {
  */
 static int scullmem_proc_open(struct inode *inode, struct file *file)
 {
+        printk("in __FUNCTION__ = %s __LINE__ = %d\n", __FUNCTION__, __LINE__);
 	return single_open(file, scull_read_procmem, NULL);
 }
 
 static int scullseq_proc_open(struct inode *inode, struct file *file)
 {
+        printk("in __FUNCTION__ = %s __LINE__ = %d\n", __FUNCTION__, __LINE__);
 	return seq_open(file, &scull_seq_ops);
 }
 
@@ -240,6 +248,7 @@ int scull_open(struct inode *inode, struct file *filp)
 {
 	struct scull_dev *dev; /* device information */
 
+        printk("in __FUNCTION__ = %s __LINE__ = %d\n", __FUNCTION__, __LINE__);
 	dev = container_of(inode->i_cdev, struct scull_dev, cdev);
 	filp->private_data = dev; /* for other methods */
 
@@ -300,6 +309,7 @@ ssize_t scull_read(struct file *filp, char __user *buf, size_t count,
 	int item, s_pos, q_pos, rest;
 	ssize_t retval = 0;
 
+        printk("in __FUNCTION__ = %s __LINE__ = %d\n", __FUNCTION__, __LINE__);
 	if (down_interruptible(&dev->sem))
 		return -ERESTARTSYS;
 	if (*f_pos >= dev->size)
@@ -344,6 +354,7 @@ ssize_t scull_write(struct file *filp, const char __user *buf, size_t count,
 	int item, s_pos, q_pos, rest;
 	ssize_t retval = -ENOMEM; /* value used in "goto out" statements */
 
+        printk("in __FUNCTION__ = %s __LINE__ = %d\n", __FUNCTION__, __LINE__);
 	if (down_interruptible(&dev->sem))
 		return -ERESTARTSYS;
 
