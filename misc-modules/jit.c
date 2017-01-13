@@ -27,8 +27,9 @@
 #include <linux/spinlock.h>
 #include <linux/interrupt.h>
 #include <linux/sched.h>
-
+#include <linux/slab.h>
 #include <asm/hardirq.h>
+#include <linux/seq_file.h>
 /*
  * This module is a silly one: it only embeds short code fragments
  * that show how time delays can be handled in the kernel.
@@ -87,11 +88,53 @@ int jit_fn(char *buf, char **start, off_t offset,
 	*start = buf;
 	return len;
 }
+int jit_currentime(struct seq_file *s, void *v);
+static int jit_currentime_open(struct inode *inode, struct file *file)
+{
+        printk("in __FUNCTION__ = %s __LINE__ = %d\n", __FUNCTION__, __LINE__);
+	return single_open(file, jit_currentime, NULL);
+}
+/*
+ * Create a set of file operations for our proc files.
+ */
+const static struct file_operations jit_currentime_ops= {
+	.owner   = THIS_MODULE,
+	.open    = jit_currentime_open,
+	.read    = seq_read,
+	.llseek  = seq_lseek,
+	.release = single_release
+};
 
 /*
  * This file, on the other hand, returns the current time forever
  */
-int jit_currentime(char *buf, char **start, off_t offset,
+int jit_currentime(struct seq_file *s, void *v)
+{
+        //int i = *(int *)v;
+        
+	struct timeval tv1;
+	struct timespec tv2;
+	unsigned long j1;
+	u64 j2;
+
+	/* get them four */
+	j1 = jiffies;
+	j2 = get_jiffies_64();
+	do_gettimeofday(&tv1);
+	tv2 = current_kernel_time();
+
+	/* print */
+	seq_printf(s," v = %d 0x%08lx 0x%016Lx %10i.%06i\n"
+		       "%40i.%09i\n", (int)v,
+		       j1, j2,
+		       (int) tv1.tv_sec, (int) tv1.tv_usec,
+		       (int) tv2.tv_sec, (int) tv2.tv_nsec);
+	return 0;
+}
+/*
+ * This file, on the other hand, returns the current time forever
+ */
+int jit_currentime_old(char *buf, char **start, off_t offset,
                    int len, int *eof, void *data)
 {
 	struct timeval tv1;
@@ -259,9 +302,11 @@ int jit_tasklet(char *buf, char **start, off_t offset,
 }
 
 
+int global_i = 4;
 
 int __init jit_init(void)
 {
+#if 0 /*this is too old to use*/
 	create_proc_read_entry("currentime", 0, NULL, jit_currentime, NULL);
 	create_proc_read_entry("jitbusy", 0, NULL, jit_fn, (void *)JIT_BUSY);
 	create_proc_read_entry("jitsched",0, NULL, jit_fn, (void *)JIT_SCHED);
@@ -272,12 +317,26 @@ int __init jit_init(void)
 	create_proc_read_entry("jitasklet", 0, NULL, jit_tasklet, NULL);
 	create_proc_read_entry("jitasklethi", 0, NULL, jit_tasklet, (void *)1);
 
+#endif
+	//proc_create_data("currentime", 0, NULL, &jit_currentime_ops,&global_i);
+	proc_create_data("currentime", 0, NULL, &jit_currentime_ops,NULL);
+#if 0
+	proc_creat_data("jitbusy", 0, NULL, jit_fn, (void *)JIT_BUSY);
+	proc_creat_data("jitsched",0, NULL, jit_fn, (void *)JIT_SCHED);
+	proc_creat_data("jitqueue",0, NULL, jit_fn, (void *)JIT_QUEUE);
+	proc_creat_data("jitschedto", 0, NULL, jit_fn, (void *)JIT_SCHEDTO);
+
+	proc_creat_data("jitimer", 0, NULL, jit_timer, NULL);
+	proc_creat_data("jitasklet", 0, NULL, jit_tasklet, NULL);
+	proc_creat_data("jitasklethi", 0, NULL, jit_tasklet, (void *)1);
+#endif
 	return 0; /* success */
 }
 
 void __exit jit_cleanup(void)
 {
 	remove_proc_entry("currentime", NULL);
+#if 0
 	remove_proc_entry("jitbusy", NULL);
 	remove_proc_entry("jitsched", NULL);
 	remove_proc_entry("jitqueue", NULL);
@@ -286,6 +345,7 @@ void __exit jit_cleanup(void)
 	remove_proc_entry("jitimer", NULL);
 	remove_proc_entry("jitasklet", NULL);
 	remove_proc_entry("jitasklethi", NULL);
+#endif
 }
 
 module_init(jit_init);
